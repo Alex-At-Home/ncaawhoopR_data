@@ -1,5 +1,5 @@
 ### Install Latest Version of Package
-devtools::install_github('lbenz730/ncaahoopR')
+devtools::install_github('Alex-At-Home/ncaawhoopR')
 
 library(ncaahoopR)
 library(readr)
