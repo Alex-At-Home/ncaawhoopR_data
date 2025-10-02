@@ -15,17 +15,7 @@ if(!dir.exists('2024-25/rosters/')) {
 }
 
 ### Schedules + Rosters
-for(i in 1:n) {
-  cat("Scraping Data for Team", i, "of", n, paste0("(", ids$team[i], ")"), "\n")
-  schedule <- try(get_schedule(ids$team[i]))
-  roster <- try(get_roster(ids$team[i]))
-  if(class(roster) != 'try-error') {
-    write_csv(roster, paste0("2024-25/rosters/", gsub(" ", "_", ids$team[i]), "_roster.csv"))
-  }
-  if(class(schedule) != 'try-error') {
-    write_csv(schedule, paste0("2024-25/schedules/", gsub(" ", "_", ids$team[i]), "_schedule.csv"))
-  }
-}
+# (not working for NCAAW anyway)
 
 ### Pull Games
 date <- max(as.Date('2024-11-01'), as.Date(dir('2024-25/pbp_logs/')) %>% max(na.rm = T))
@@ -72,56 +62,4 @@ while(date <= Sys.Date()) {
 write_csv(master_schedule, "2024-25/pbp_logs/schedule.csv")
 
 ### Box Scores
-schedules <- dir(paste("2024-25/schedules", sep = "/"), full.names = T)
-schedules_clean <- dir(paste("2024-25/schedules", sep = "/"), full.names = F)
-n <- length(schedules)
-for(i in 1:n) {
-  ### Read in Schedule
-  s <- read_csv(schedules[i], col_types = cols())
-  s <- filter(s, date <= Sys.Date())
-  n1 <- nrow(s)
-  ### Try to Scrape PBP
-  for(k in 1:n1) {
-    cat("Scraping Game", k, "of", n1, "for Team", i, "of", n, "\n")
-    team <- gsub("_", " ", gsub("_schedule.csv", "", schedules_clean[i]))
-    file <- paste("2024-25/box_scores", gsub(" ", "_", team), paste0(s$game_id[k], ".csv"), sep = "/")
-    if(!file.exists(file)) {
-      box <- try(get_boxscore(s$game_id[k]))
-      
-      if(is.null(box)) {
-        next
-      } else if(class(box) == 'try-error') {
-        next
-      }
-      
-      box_team <- case_when(team == "UConn" ~ team, 
-                            T ~ dict$ESPN_PBP[dict$ESPN == team])
-      
-      if(!(box_team %in% names(box))) {
-        teams <- names(box)
-        substring_ix <- grepl(team, teams)
-        if(sum(substring_ix) == 1) {
-          box_team <- teams[substring_ix] 
-        } else {
-          box_team <- teams[which.min(stringdist::stringdist(teams, team))]
-        }
-      }
-      
-      
-      if(class(box) != "try-error" & box_team %in% names(box) & !is.na(box_team)) {
-        ### Create Date Directory if Doesn't Exist
-        if(!dir.exists(paste("2024-25/box_scores", sep = "/"))) {
-          dir.create(paste("2024-25/box_scores", sep = "/")) 
-        }
-        if(!dir.exists(paste("2024-25/box_scores", gsub(" ", "_", team), sep = "/"))) {
-          dir.create(paste("2024-25/box_scores", gsub(" ", "_", team), sep = "/"))
-        }
-        df <- as.data.frame(box[[box_team]])
-        df$date <- s$date[k]
-        df$opponent <- s$opponent[k]
-        df$location <- s$location[k]
-        write_csv(df, file)
-      } 
-    }
-  }
-}
+#(don't need this)
